@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flask Paragraph Example</title>
+</head>
+<body>
+    <p>Aloha</p>
+    <form method="POST">
+        <input name="text">
+        <input type="submit">
+    </form>
+
+    <p>{{geo}}</p>
+
+    {% if geo %}
+    <form method="POST" action="/select">
+        <p>Select a location:</p>
+        {% for location in geo %}
+            <label>
+                <input type="radio" name="selected_location" value="{{ loop.index0 }}">
+                {{ location.name }}, {{ location.state or '' }}, {{ location.country }}
+            </label><br>
+        {% endfor %}
+        <button type="submit">Submit Selection</button>
+    </form>
+    {% endif %}
+</body>
+</html>
