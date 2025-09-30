@@ -1,10 +1,17 @@
+<form method="POST" action="/">
+    <input name="text" placeholder="Enter city name">
+    <input type="submit" value="Search">
+</form>
 
 <form method="POST" action="/select">
         {% if not results %}
             <p>Select a location:</p>
         {%endif%}
+        <h1>{{results['city'] }}</h1>
+        <p> {{ results['name'] }}</p>
         <p>Temperature: {{ results['temperature_f'] }}°F</p>
         <p>Feels like: {{ results['feels_like_f'] }}°F</p>
         <p>Humidity: {{ results['humidity'] }}%</p>
         <p>Weather: {{ results['description'] }}</p>
         <img src="http://openweathermap.org/img/wn/{{ results['icon'] }}@2x.png" alt="Weather icon">
+

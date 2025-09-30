@@ -9,7 +9,7 @@ openweather_api_key =  os.getenv("OPEN_WEATHER_API")
 app = Flask(__name__)
 app.secret_key = '2203489023923'
 
-app_id = '08588f09c1a372a6800949cc83c889a2'
+#app_id = '08588f09c1a372a6800949cc83c889a2'
 
 def build_weather_url(lat,lon): 
     return f"https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={openweather_api_key}&units=imperial"
@@ -39,16 +39,15 @@ def show_selected():
         try:
             index = int(selected_index)
             selected_location = geo_data[index]
-            name = selected_location.get('name')
             lat = selected_location.get('lat')
             lon = selected_location.get('lon')
-            state = selected_location.get('state', '')
-            country = selected_location.get('country')
+            city_name = selected_location.get('name')
             weather_url =build_weather_url(lat, lon)
             response = requests.get(weather_url)
             data = response.json()
 
             return render_template('select.html', results = {
+                "name":city_name,
                 "city": data.get("name", "Unknown"),
                 "country": data["sys"].get("country", "Unknown"),
                 "temperature_f": round(data["main"]["temp"]),
