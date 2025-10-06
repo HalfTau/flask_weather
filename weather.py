@@ -19,7 +19,8 @@ def build_geo_url(city):
 
 @app.route('/')
 def hello_world():
-    return render_template('index.html')
+    content = 'hello'
+    return render_template('index.html', content=content)
 
 @app.route('/', methods=['POST'])
 def my_form_post():
@@ -57,8 +58,6 @@ def show_selected():
                 "icon": data["weather"][0].get("icon", "No icon")
             })
 
-            return render_template("select.html", name=name, lat=lat, lon=lon)
-            return f"You selected: {name}, {state}, {country}"
         except (IndexError, ValueError):
             return "Invalid selection"
 

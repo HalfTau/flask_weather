@@ -7,8 +7,8 @@
         {% if not results %}
             <p>Select a location:</p>
         {%endif%}
-        <h1>{{results['city'] }}</h1>
-        <p> {{ results['name'] }}</p>
+        <h1>{{ results['name'] }}</h1>
+
         <p>Temperature: {{ results['temperature_f'] }}°F</p>
         <p>Feels like: {{ results['feels_like_f'] }}°F</p>
         <p>Humidity: {{ results['humidity'] }}%</p>
