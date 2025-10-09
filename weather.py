@@ -12,7 +12,7 @@ app.secret_key = '2203489023923'
 #app_id = '08588f09c1a372a6800949cc83c889a2'
 
 def build_weather_url(lat,lon): 
-    return f"https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={openweather_api_key}&units=imperial"
+    return f"https://api.openweathermap.org/data/3.0/onecall?lat={lat}&lon={lon}&exclude=hourly&appid={openweather_api_key}&units=imperial"
 
 def build_geo_url(city): 
     return f"http://api.openweathermap.org/geo/1.0/direct?q={city}&limit=5&appid={openweather_api_key}"
@@ -42,21 +42,28 @@ def show_selected():
             selected_location = geo_data[index]
             lat = selected_location.get('lat')
             lon = selected_location.get('lon')
-            city_name = selected_location.get('name')
-            weather_url =build_weather_url(lat, lon)
+            city_name = selected_location.get('name', "Unknown") 
+            weather_url = build_weather_url(lat, lon)
             response = requests.get(weather_url)
             data = response.json()
+            #print(session['geo_data'].get('country'))
 
-            return render_template('select.html', results = {
-                "name":city_name,
-                "city": data.get("name", "Unknown"),
-                "country": data["sys"].get("country", "Unknown"),
-                "temperature_f": round(data["main"]["temp"]),
-                "feels_like_f": round(data["main"]["feels_like"]),
-                "humidity": data["main"].get("humidity"),
-                "description": data["weather"][0].get("description", "No description"),
-                "icon": data["weather"][0].get("icon", "No icon")
-            })
+            # Extract the necessary information from the One Call API response
+            current_weather = data.get('current', {})
+            weather_info = {
+                "name": city_name,  
+                "city": city_name,
+                "country": geo_data[0].get('country', 'Unknown'),
+                "temperature_f": round(current_weather.get('temp', 0)),
+                "feels_like_f": round(current_weather.get('feels_like', 0)),
+                "humidity": current_weather.get('humidity', 0),
+                "description": current_weather.get('weather', [{}])[0].get("description", "No description"),
+                "icon": current_weather.get('weather', [{}])[0].get("icon", "No icon")
+            }
+            daily_forecasts = data.get("daily", [])
+            print(daily_forecasts)
+
+            return render_template('select.html', results=weather_info, forecast = daily_forecasts)
 
         except (IndexError, ValueError):
             return "Invalid selection"
