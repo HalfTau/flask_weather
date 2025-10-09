@@ -14,7 +14,13 @@
         <p>Humidity: {{ results['humidity'] }}%</p>
         <p>Weather: {{ results['description'] }}</p>
         <img src="http://openweathermap.org/img/wn/{{ results['icon'] }}@2x.png" alt="Weather icon">
-        {%for day in forecast%}
-            <p>{{loop.index}}. {{day['temp']}}</p>
-        {%endfor%}
+        <h2>Weekly Forecast:</h2>
+        {% for day in forecast %}
+        <div>
+            <h3>{{ day.date }}</h3>
+            <p>Day: {{ day.temp_day }}°F, Night: {{ day.temp_night }}°F</p>
+            <p>{{ day.description }}</p>
+            <img src="https://openweathermap.org/img/wn/{{ day.icon }}@2x.png">
+        </div>
+        {% endfor %}
 

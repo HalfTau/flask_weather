@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, session
 import requests
 import os
+from datetime import datetime
 from dotenv import load_dotenv
 from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
 load_dotenv()
@@ -60,9 +61,19 @@ def show_selected():
                 "description": current_weather.get('weather', [{}])[0].get("description", "No description"),
                 "icon": current_weather.get('weather', [{}])[0].get("icon", "No icon")
             }
-            daily_forecasts = data.get("daily", [])
-            print(daily_forecasts)
+            daily_forecasts_raw = data.get("daily", [])
 
+            daily_forecasts = []
+            for day in daily_forecasts_raw:
+                forecast_date = datetime.utcfromtimestamp(day.get('dt')).strftime('%A, %b %d')
+                daily_forecasts.append({
+                    'date': forecast_date,
+                    'temp_day': round(day.get('temp', {}).get('day', 0)),
+                    'temp_night': round(day.get('temp', {}).get('night', 0)),
+                    'description': day.get('weather', [{}])[0].get('description', 'No description'),
+                    'icon': day.get('weather', [{}])[0].get('icon', '01d')
+                })
+            
             return render_template('select.html', results=weather_info, forecast = daily_forecasts)
 
         except (IndexError, ValueError):
