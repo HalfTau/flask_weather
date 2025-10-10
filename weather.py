@@ -25,8 +25,8 @@ def hello_world():
 
 @app.route('/', methods=['POST'])
 def my_form_post():
-    text = request.form['text']
-    geo_url = build_geo_url(text)
+    city_query = request.form['text']
+    geo_url = build_geo_url(city_query)
     geo_request = requests.get(geo_url)
     geo_data = geo_request.json()
     session['geo_data'] = geo_data
@@ -46,11 +46,11 @@ def show_selected():
             city_name = selected_location.get('name', "Unknown") 
             weather_url = build_weather_url(lat, lon)
             response = requests.get(weather_url)
-            data = response.json()
+            weather_data = response.json()
             #print(session['geo_data'].get('country'))
 
             # Extract the necessary information from the One Call API response
-            current_weather = data.get('current', {})
+            current_weather = weather_data.get('current', {})
             weather_info = {
                 "name": city_name,  
                 "city": city_name,
@@ -61,8 +61,8 @@ def show_selected():
                 "description": current_weather.get('weather', [{}])[0].get("description", "No description"),
                 "icon": current_weather.get('weather', [{}])[0].get("icon", "No icon")
             }
-            daily_forecasts_raw = data.get("daily", [])
-
+            
+            daily_forecasts_raw = weather_data.get("daily", [])
             daily_forecasts = []
             for day in daily_forecasts_raw:
                 forecast_date = datetime.utcfromtimestamp(day.get('dt')).strftime('%A, %b %d')
