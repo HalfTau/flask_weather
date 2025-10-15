@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link rel="stylesheet" href="styles.css">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flask Paragraph Example</title>
+    <title>Flask Weather</title>
 </head>
 <body>
     <p>Aloha</p>
@@ -15,7 +16,7 @@
 
 
     {% if geo %}
-    <form method="POST" action="/select">
+    <form method="POST" action="/result">
         <p>Select a location:</p>
         {% for location in geo %}
             <label>

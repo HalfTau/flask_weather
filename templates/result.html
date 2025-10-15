@@ -1,0 +1,70 @@
+<head>
+    <style>
+        .forecast-container {
+        justify-content: center;
+        background-color: #333;
+        overflow-x: auto;
+        white-space: nowrap;
+        padding: 10px;
+        }
+
+        .forecast-day {
+        display: inline-block;
+        background: #444;
+        color: white;
+        text-align: center;
+        margin-right: 10px;
+        border-radius: 8px;
+        padding: 10px;
+        width: 150px;
+        }
+
+        .hourly {
+            
+        }
+        
+        .hourly img {
+            width: 30px;
+            height: 30px;
+        }
+    </style>
+
+    <title>Flask Weather</title>
+</head>
+<body>
+    <form method="POST" action="/">
+        <input name="text" placeholder="Enter city name">
+        <input type="submit" value="Search">
+    </form>
+
+    <form method="POST" action="/result">
+            {% if not results %}
+                <p>Select a location:</p>
+            {%endif%}
+            <h1>{{ results['name'] }}, {{ results['country'] }}</h1>
+
+            <p>Temperature: {{ results['temperature_f'] }}°F</p>
+            <p>Feels like: {{ results['feels_like_f'] }}°F</p>
+            <p>Humidity: {{ results['humidity'] }}%</p>
+            <p>Weather: {{ results['description'] }}</p>
+            <img src="http://openweathermap.org/img/wn/{{ results['icon'] }}@2x.png" alt="Weather icon">
+            <h2>Weekly Forecast:</h2>
+        <div class="forecast-container">
+            {% for day in forecast %}
+                <div class="forecast-day">
+                    <h3>{{ day.date }}</h3>
+                    <p>Day: {{ day.temp_day }}°F, Night: {{ day.temp_night }}°F</p>
+                    <p>{{ day.description }}</p>
+                    <img src="https://openweathermap.org/img/wn/{{ day.icon }}@2x.png">
+                </div>
+            {%endfor%}
+
+        </div>
+
+        <div class="hourly">
+            {%for hour in hourly%}
+                <p>{{hour.date}}: {{hour.temp}} <img src="https://openweathermap.org/img/wn/{{ hour.icon }}@2x.png"></p>
+            {%endfor%}
+        </div>
+
+</body>

@@ -13,7 +13,7 @@ app.secret_key = '2203489023923'
 #app_id = '08588f09c1a372a6800949cc83c889a2'
 
 def build_weather_url(lat,lon): 
-    return f"https://api.openweathermap.org/data/3.0/onecall?lat={lat}&lon={lon}&exclude=hourly&appid={openweather_api_key}&units=imperial"
+    return f"https://api.openweathermap.org/data/3.0/onecall?lat={lat}&lon={lon}&appid={openweather_api_key}&units=imperial"
 
 def build_geo_url(city): 
     return f"http://api.openweathermap.org/geo/1.0/direct?q={city}&limit=5&appid={openweather_api_key}"
@@ -32,7 +32,7 @@ def my_form_post():
     session['geo_data'] = geo_data
     return render_template('index.html', geo=geo_data)
 
-@app.route('/select', methods=['POST'])
+@app.route('/result', methods=['POST'])
 def show_selected():
     selected_index = request.form.get('selected_location')
     geo_data = session.get('geo_data', [])
@@ -74,7 +74,16 @@ def show_selected():
                     'icon': day.get('weather', [{}])[0].get('icon', '01d')
                 })
             
-            return render_template('select.html', results=weather_info, forecast = daily_forecasts)
+            hourly_forecasts = []
+            for hour in weather_data['hourly']:
+                daily_forecast_date = datetime.utcfromtimestamp(hour.get('dt')).strftime('%A, %b %d')
+                hourly_forecasts.append({
+                    'date': daily_forecast_date,
+                    'temp': round(hour.get('temp', {})),
+                    'icon': hour.get('weather', [{}])[0].get('icon', '01d')
+                })
+            
+            return render_template('result.html', results=weather_info, forecast = daily_forecasts, hourly = hourly_forecasts)
 
         except (IndexError, ValueError):
             return "Invalid selection"
