@@ -1,5 +1,6 @@
 <head>
     <style>
+        
         .forecast-container {
         justify-content: center;
         background-color: #333;
@@ -56,15 +57,18 @@
                     <p>Day: {{ day.temp_day }}°F, Night: {{ day.temp_night }}°F</p>
                     <p>{{ day.description }}</p>
                     <img src="https://openweathermap.org/img/wn/{{ day.icon }}@2x.png">
+                    {%for hour in hourly%}
+                        {%if day.date == hour.date%}
+                        <p>{{hour.date}}: {{hour.temp}} <img src="https://openweathermap.org/img/wn/{{ hour.icon }}@2x.png"></p>
+                        {%endif%}
+                    {%endfor%}
                 </div>
             {%endfor%}
 
         </div>
 
         <div class="hourly">
-            {%for hour in hourly%}
-                <p>{{hour.date}}: {{hour.temp}} <img src="https://openweathermap.org/img/wn/{{ hour.icon }}@2x.png"></p>
-            {%endfor%}
+
         </div>
 
 </body>

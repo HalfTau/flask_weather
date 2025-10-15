@@ -32,6 +32,17 @@ def my_form_post():
     session['geo_data'] = geo_data
     return render_template('index.html', geo=geo_data)
 
+def generate_hourly(weather_data) :
+    hourly_forecasts = []
+    for hour in weather_data['hourly']:
+        daily_forecast_date = datetime.utcfromtimestamp(hour.get('dt')).strftime('%A, %b %d')
+
+        hourly_forecasts.append({
+            'date': daily_forecast_date,
+            'temp': round(hour.get('temp', {})),
+            'icon': hour.get('weather', [{}])[0].get('icon', '01d')
+        })
+    return hourly_forecasts
 @app.route('/result', methods=['POST'])
 def show_selected():
     selected_index = request.form.get('selected_location')
@@ -74,14 +85,7 @@ def show_selected():
                     'icon': day.get('weather', [{}])[0].get('icon', '01d')
                 })
             
-            hourly_forecasts = []
-            for hour in weather_data['hourly']:
-                daily_forecast_date = datetime.utcfromtimestamp(hour.get('dt')).strftime('%A, %b %d')
-                hourly_forecasts.append({
-                    'date': daily_forecast_date,
-                    'temp': round(hour.get('temp', {})),
-                    'icon': hour.get('weather', [{}])[0].get('icon', '01d')
-                })
+            hourly_forecasts = generate_hourly(weather_data)
             
             return render_template('result.html', results=weather_info, forecast = daily_forecasts, hourly = hourly_forecasts)
 
