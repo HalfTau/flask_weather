@@ -47,7 +47,7 @@ function toggleDiv(divId, linkId) {
                 <!--building a div for each hour available. Gives each div a unique ID based on 
                 the index of the loop.-->
                 {% if day.hours %}
-                <div id="hour_div_{{ loop.index }}" style="display: none;">
+                <div class="hour-div" id="hour_div_{{ loop.index }}" style="display: none;">
                     {% for hour in day.hours %}
                     <p>{{ hour.time }}: {{ hour.temp }}°F
                     <img src="https://openweathermap.org/img/wn/{{ hour.icon }}@2x.png"></p>

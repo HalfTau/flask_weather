@@ -7,8 +7,10 @@
         white-space: nowrap;
         padding: 10px;
         }
-
-        .forecast-day {
+    .forecast-container a { 
+        text-align: center;
+        }
+    .forecast-day {
         display: inline-block;
         background: #444;
         color: white;
@@ -17,13 +19,19 @@
         border-radius: 8px;
         padding: 5px;
         width: 140px;
-        }
-
-        a {
-            color:white;
-        }
+    }
+    .hour-div {
         
-        .hourly img {
-            width: 30px;
-            height: 30px;
-        }
+    }
+    .hour-div img {
+        width: 25;
+        height: 25;
+    }
+    a {
+        color:white;
+    }
+    
+    .hourly img {
+        width: 30px;
+        height: 30px;
+    }
