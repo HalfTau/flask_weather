@@ -38,6 +38,7 @@ def generate_current(geo_data, current_weather, city_name):
     weather_info = {
         "name": city_name,  
         "city": city_name,
+        "state": geo_data[0].get('state', 'Unknown'),
         "country": geo_data[0].get('country', 'Unknown'),
         "temperature_f": round(current_weather.get('temp', 0)),
         "feels_like_f": round(current_weather.get('feels_like', 0)),
@@ -73,71 +74,70 @@ def generate_hourly(weather_data) :
             'icon': hour.get('weather', [{}])[0].get('icon', '01d')
         })
     return hourly_forecasts
-from zoneinfo import ZoneInfo
 
 @app.route('/result', methods=['POST'])
 def show_selected():
     selected_index = request.form.get('selected_location')
     geo_data = session.get('geo_data', [])
 
-    if selected_index is not None and geo_data:
-        try:
-            index = int(selected_index)
-            selected_location = geo_data[index]
-            lat = selected_location.get('lat')
-            lon = selected_location.get('lon')
-            city_name = selected_location.get('name', "Unknown") 
-            weather_url = build_weather_url(lat, lon)
-            response = requests.get(weather_url)
-            weather_data = response.json()
+    if not (selected_index and geo_data):
+        return "No selection or geo data available"
 
-            pacific = ZoneInfo("America/Los_Angeles")
+    try:
+        index = int(selected_index)
+        selected_location = geo_data[index]
+        lat, lon = selected_location["lat"], selected_location["lon"]
+        city_name = selected_location.get("name", "Unknown")
 
-            # Localize all timestamps
-            for hour in weather_data["hourly"]:
-                hour["local_dt"] = datetime.utcfromtimestamp(hour["dt"]).replace(
-                    tzinfo=ZoneInfo("UTC")
-                ).astimezone(pacific)
-                hour["local_date"] = hour["local_dt"].date()
+        weather_url = build_weather_url(lat, lon)
+        response = requests.get(weather_url)
+        weather_data = response.json()
 
-            # Group daily data with hours
-            daily_forecasts = []
-            for day in weather_data["daily"]:
-                local_dt = datetime.utcfromtimestamp(day["dt"]).replace(
-                    tzinfo=ZoneInfo("UTC")
-                ).astimezone(pacific)
-                local_date = local_dt.date()
+        pacific = ZoneInfo("America/Los_Angeles")
 
-                hours_for_day = [
-                    {
+        # Localize hourly timestamps
+        for hour in weather_data["hourly"]:
+            hour["local_dt"] = datetime.utcfromtimestamp(hour["dt"]).replace(
+                tzinfo=ZoneInfo("UTC")
+            ).astimezone(pacific)
+            hour["local_date"] = hour["local_dt"].date()
+
+        # Build daily forecasts and attach matching hours
+        daily_forecasts = []
+        for day in weather_data["daily"]:
+            local_dt = datetime.utcfromtimestamp(day["dt"]).replace(
+                tzinfo=ZoneInfo("UTC")
+            ).astimezone(pacific)
+            local_date = local_dt.date()
+
+            hours_for_day = []
+            for h in weather_data["hourly"]:
+                if h["local_date"] == local_date:
+                    hour_info = {
                         "time": h["local_dt"].strftime("%a %I %p"),
                         "temp": round(h["temp"]),
                         "icon": h["weather"][0]["icon"]
                     }
-                    for h in weather_data["hourly"]
-                    if h["local_date"] == local_date
-                ]
+                    hours_for_day.append(hour_info)
 
-                daily_forecasts.append({
-                    "date": local_dt.strftime("%A, %b %d"),
-                    "temp_day": round(day["temp"]["day"]),
-                    "temp_night": round(day["temp"]["night"]),
-                    "description": day["weather"][0]["description"],
-                    "icon": day["weather"][0]["icon"],
-                    "hours": hours_for_day
-                })
+            daily_forecasts.append({
+                "date": local_dt.strftime("%A, %b %d"),
+                "temp_day": round(day["temp"]["day"]),
+                "temp_night": round(day["temp"]["night"]),
+                "description": day["weather"][0]["description"],
+                "icon": day["weather"][0]["icon"],
+                "hours": hours_for_day
+            })
 
-            # Current conditions
-            current_weather = weather_data.get('current', {})
-            weather_info = generate_current(geo_data, current_weather, city_name)
+        # Current weather
+        current_weather = weather_data.get("current", {})
+        weather_info = generate_current(geo_data, current_weather, city_name)
 
-            return render_template(
-                'result.html',
-                results=weather_info,
-                forecast=daily_forecasts
-            )
+        return render_template(
+            "result.html",
+            results=weather_info,
+            forecast=daily_forecasts
+        )
 
-        except (IndexError, ValueError):
-            return "Invalid selection"
-
-    return "No selection or geo data available"
+    except (IndexError, ValueError):
+        return "Invalid selection"

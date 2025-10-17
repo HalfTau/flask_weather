@@ -1,36 +1,23 @@
 <head>
-    <style>
-        
-        .forecast-container {
-        justify-content: center;
-        background-color: #333;
-        overflow-x: auto;
-        white-space: nowrap;
-        padding: 10px;
-        }
-
-        .forecast-day {
-        display: inline-block;
-        background: #444;
-        color: white;
-        text-align: center;
-        margin-right: 10px;
-        border-radius: 8px;
-        padding: 10px;
-        width: 150px;
-        }
-
-        .hourly {
-            
-        }
-        
-        .hourly img {
-            width: 30px;
-            height: 30px;
-        }
-    </style>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
 
     <title>Flask Weather</title>
+
+<script>
+function toggleDiv(divId, linkId) {
+  const div = document.getElementById(divId);
+  const link = document.getElementById(linkId);
+
+  if (div.style.display === 'block') {
+    div.style.display = 'none';
+    link.textContent = 'Show Hours';
+  } else {
+    div.style.display = 'block';
+    link.textContent = 'Hide Hours';
+  }
+}
+</script>
+
 </head>
 <body>
     <form method="POST" action="/">
@@ -42,7 +29,7 @@
             {% if not results %}
                 <p>Select a location:</p>
             {%endif%}
-            <h1>{{ results['name'] }}, {{ results['country'] }}</h1>
+            <h1>{{ results['name'] }}, {{results['state']}}, {{ results['country'] }}</h1>
 
             <p>Temperature: {{ results['temperature_f'] }}°F</p>
             <p>Feels like: {{ results['feels_like_f'] }}°F</p>
@@ -52,18 +39,26 @@
             <h2>Weekly Forecast:</h2>
             <div class="forecast-container">
             {% for day in forecast %}
-                <div class="forecast-day">
+            <div class="forecast-day">
                 <h3>{{ day.date }}</h3>
                 <p>Day: {{ day.temp_day }}°F, Night: {{ day.temp_night }}°F</p>
                 <p>{{ day.description }}</p>
                 <img src="https://openweathermap.org/img/wn/{{ day.icon }}@2x.png">
-                
-                {% for hour in day.hours %}
-                    <p>{{ hour.time }}: {{ hour.temp }}°F 
+                <!--building a div for each hour available. Gives each div a unique ID based on 
+                the index of the loop.-->
+                {% if day.hours %}
+                <div id="hour_div_{{ loop.index }}" style="display: none;">
+                    {% for hour in day.hours %}
+                    <p>{{ hour.time }}: {{ hour.temp }}°F
                     <img src="https://openweathermap.org/img/wn/{{ hour.icon }}@2x.png"></p>
-                {% endfor %}
+                    {% endfor %}
                 </div>
+                <!--building what gets sent back to toggleDiv. The unique ID of the div as well as the ID for the link. This lets toggleDiv to toggle both the hourly div as well as the link-->
+                <a href="javascript:toggleDiv('hour_div_{{ loop.index }}', 'toggle_link_{{ loop.index }}');" id="toggle_link_{{ loop.index }}">Show Hours</a>
+                {% endif %}
+            </div>
             {% endfor %}
+
             </div>
 
         </div>
