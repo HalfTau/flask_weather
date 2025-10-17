@@ -4,6 +4,7 @@ import os
 from datetime import datetime
 from dotenv import load_dotenv
 from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
+
 load_dotenv()
 openweather_api_key =  os.getenv("OPEN_WEATHER_API")
 
@@ -50,6 +51,7 @@ def generate_daily(daily_forecasts_raw):
     for day in daily_forecasts_raw:
         forecast_date = datetime.utcfromtimestamp(day.get('dt')).strftime('%A, %b %d')
         daily_forecasts.append({
+            'dt': day.get('dt'),
             'date': forecast_date,
             'temp_day': round(day.get('temp', {}).get('day', 0)),
             'temp_night': round(day.get('temp', {}).get('night', 0)),
@@ -61,9 +63,10 @@ def generate_daily(daily_forecasts_raw):
 def generate_hourly(weather_data) :
     hourly_forecasts = []
     for hour in weather_data['hourly']:
-        daily_forecast_date = datetime.utcfromtimestamp(hour.get('dt')).strftime('%A, %b %d')
+        daily_forecast_date = datetime.utcfromtimestamp(hour.get('dt')).strftime('%a %I %p')
 
         hourly_forecasts.append({
+            'dt': hour.get('dt'),
             'date': daily_forecast_date,
             'temp': round(hour.get('temp', {})),
             'icon': hour.get('weather', [{}])[0].get('icon', '01d')
@@ -85,6 +88,7 @@ def show_selected():
             response = requests.get(weather_url)
             weather_data = response.json()
 
+
             # Extract the necessary information from the One Call API response
             current_weather = weather_data.get('current', {})
             weather_info = generate_current(geo_data, current_weather, city_name)
@@ -93,6 +97,7 @@ def show_selected():
             daily_forecasts = generate_daily(daily_forecasts_raw)
             hourly_forecasts = generate_hourly(weather_data)
             
+
             return render_template('result.html', results=weather_info, forecast = daily_forecasts, hourly = hourly_forecasts)
 
         except (IndexError, ValueError):

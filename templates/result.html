@@ -58,7 +58,7 @@
                     <p>{{ day.description }}</p>
                     <img src="https://openweathermap.org/img/wn/{{ day.icon }}@2x.png">
                     {%for hour in hourly%}
-                        {%if day.date == hour.date%}
+                        {% if hour.dt >= day.dt and hour.dt < day.dt + 86400 %}
                         <p>{{hour.date}}: {{hour.temp}}°F <img src="https://openweathermap.org/img/wn/{{ hour.icon }}@2x.png"></p>
                         {%endif%}
                     {%endfor%}
