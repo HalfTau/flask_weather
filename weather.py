@@ -4,6 +4,7 @@ import os
 from datetime import datetime
 from dotenv import load_dotenv
 from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
+from zoneinfo import ZoneInfo
 
 load_dotenv()
 openweather_api_key =  os.getenv("OPEN_WEATHER_API")
@@ -72,6 +73,8 @@ def generate_hourly(weather_data) :
             'icon': hour.get('weather', [{}])[0].get('icon', '01d')
         })
     return hourly_forecasts
+from zoneinfo import ZoneInfo
+
 @app.route('/result', methods=['POST'])
 def show_selected():
     selected_index = request.form.get('selected_location')
@@ -88,17 +91,51 @@ def show_selected():
             response = requests.get(weather_url)
             weather_data = response.json()
 
+            pacific = ZoneInfo("America/Los_Angeles")
 
-            # Extract the necessary information from the One Call API response
+            # Localize all timestamps
+            for hour in weather_data["hourly"]:
+                hour["local_dt"] = datetime.utcfromtimestamp(hour["dt"]).replace(
+                    tzinfo=ZoneInfo("UTC")
+                ).astimezone(pacific)
+                hour["local_date"] = hour["local_dt"].date()
+
+            # Group daily data with hours
+            daily_forecasts = []
+            for day in weather_data["daily"]:
+                local_dt = datetime.utcfromtimestamp(day["dt"]).replace(
+                    tzinfo=ZoneInfo("UTC")
+                ).astimezone(pacific)
+                local_date = local_dt.date()
+
+                hours_for_day = [
+                    {
+                        "time": h["local_dt"].strftime("%a %I %p"),
+                        "temp": round(h["temp"]),
+                        "icon": h["weather"][0]["icon"]
+                    }
+                    for h in weather_data["hourly"]
+                    if h["local_date"] == local_date
+                ]
+
+                daily_forecasts.append({
+                    "date": local_dt.strftime("%A, %b %d"),
+                    "temp_day": round(day["temp"]["day"]),
+                    "temp_night": round(day["temp"]["night"]),
+                    "description": day["weather"][0]["description"],
+                    "icon": day["weather"][0]["icon"],
+                    "hours": hours_for_day
+                })
+
+            # Current conditions
             current_weather = weather_data.get('current', {})
             weather_info = generate_current(geo_data, current_weather, city_name)
 
-            daily_forecasts_raw = weather_data.get("daily", [])
-            daily_forecasts = generate_daily(daily_forecasts_raw)
-            hourly_forecasts = generate_hourly(weather_data)
-            
-
-            return render_template('result.html', results=weather_info, forecast = daily_forecasts, hourly = hourly_forecasts)
+            return render_template(
+                'result.html',
+                results=weather_info,
+                forecast=daily_forecasts
+            )
 
         except (IndexError, ValueError):
             return "Invalid selection"

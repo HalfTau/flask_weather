@@ -50,20 +50,21 @@
             <p>Weather: {{ results['description'] }}</p>
             <img src="http://openweathermap.org/img/wn/{{ results['icon'] }}@2x.png" alt="Weather icon">
             <h2>Weekly Forecast:</h2>
-        <div class="forecast-container">
+            <div class="forecast-container">
             {% for day in forecast %}
                 <div class="forecast-day">
-                    <h3>{{ day.date }}</h3>
-                    <p>Day: {{ day.temp_day }}°F, Night: {{ day.temp_night }}°F</p>
-                    <p>{{ day.description }}</p>
-                    <img src="https://openweathermap.org/img/wn/{{ day.icon }}@2x.png">
-                    {%for hour in hourly%}
-                        {% if hour.dt >= day.dt and hour.dt < day.dt + 86400 %}
-                        <p>{{hour.date}}: {{hour.temp}}°F <img src="https://openweathermap.org/img/wn/{{ hour.icon }}@2x.png"></p>
-                        {%endif%}
-                    {%endfor%}
+                <h3>{{ day.date }}</h3>
+                <p>Day: {{ day.temp_day }}°F, Night: {{ day.temp_night }}°F</p>
+                <p>{{ day.description }}</p>
+                <img src="https://openweathermap.org/img/wn/{{ day.icon }}@2x.png">
+                
+                {% for hour in day.hours %}
+                    <p>{{ hour.time }}: {{ hour.temp }}°F 
+                    <img src="https://openweathermap.org/img/wn/{{ hour.icon }}@2x.png"></p>
+                {% endfor %}
                 </div>
-            {%endfor%}
+            {% endfor %}
+            </div>
 
         </div>
 
