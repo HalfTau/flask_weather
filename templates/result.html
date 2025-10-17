@@ -1,5 +1,7 @@
 <head>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+
 
     <title>Flask Weather</title>
 
@@ -41,9 +43,10 @@ function toggleDiv(divId, linkId) {
     </div>
 
             <h2>Weekly Forecast:</h2>
-            <div class="forecast-container">
+            <div class="card text-left">
+            <div class="card-body">
             {% for day in forecast %}
-            <div class="forecast-day">
+            <div class="forecast-day d-flex align-items-start mb-4 gap-3 flex-wrap border-bottom pb-">
                 <h3>{{ day.date }}</h3>
                 <p>Day: {{ day.temp_day }}°F, Night: {{ day.temp_night }}°F</p>
                 <p>{{ day.description }}</p>
@@ -63,6 +66,7 @@ function toggleDiv(divId, linkId) {
             </div>
             {% endfor %}
 
+            </div>
             </div>
 
         </div>

@@ -1,37 +1,6 @@
-
-        
-        .forecast-container {
-        justify-content: center;
-        background-color: #333;
-        overflow-x: auto;
-        white-space: nowrap;
-        padding: 10px;
-        }
-    .forecast-container a { 
-        text-align: center;
-        }
-    .forecast-day {
-        display: inline-block;
-        background: #444;
-        color: white;
-        text-align: center;
-        margin-right: 10px;
-        border-radius: 8px;
-        padding: 5px;
-        width: 140px;
-    }
+\
     .hour-div {
-        
+        display: inline-block;
+        float: none; /* Important to remove default float behavior */
     }
-    .hour-div img {
-        width: 25;
-        height: 25;
-    }
-    a {
-        color:white;
-    }
-    
-    .hourly img {
-        width: 30px;
-        height: 30px;
     }
