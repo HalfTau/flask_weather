@@ -32,6 +32,32 @@ def my_form_post():
     session['geo_data'] = geo_data
     return render_template('index.html', geo=geo_data)
 
+def generate_current(geo_data, current_weather, city_name):
+    weather_info = {
+        "name": city_name,  
+        "city": city_name,
+        "country": geo_data[0].get('country', 'Unknown'),
+        "temperature_f": round(current_weather.get('temp', 0)),
+        "feels_like_f": round(current_weather.get('feels_like', 0)),
+        "humidity": current_weather.get('humidity', 0),
+        "description": current_weather.get('weather', [{}])[0].get("description", "No description"),
+        "icon": current_weather.get('weather', [{}])[0].get("icon", "No icon")
+    }
+    return weather_info
+
+def generate_daily(daily_forecasts_raw):
+    daily_forecasts = []
+    for day in daily_forecasts_raw:
+        forecast_date = datetime.utcfromtimestamp(day.get('dt')).strftime('%A, %b %d')
+        daily_forecasts.append({
+            'date': forecast_date,
+            'temp_day': round(day.get('temp', {}).get('day', 0)),
+            'temp_night': round(day.get('temp', {}).get('night', 0)),
+            'description': day.get('weather', [{}])[0].get('description', 'No description'),
+            'icon': day.get('weather', [{}])[0].get('icon', '01d')
+        }) 
+    return daily_forecasts
+
 def generate_hourly(weather_data) :
     hourly_forecasts = []
     for hour in weather_data['hourly']:
@@ -58,33 +84,13 @@ def show_selected():
             weather_url = build_weather_url(lat, lon)
             response = requests.get(weather_url)
             weather_data = response.json()
-            #print(session['geo_data'].get('country'))
 
             # Extract the necessary information from the One Call API response
             current_weather = weather_data.get('current', {})
-            weather_info = {
-                "name": city_name,  
-                "city": city_name,
-                "country": geo_data[0].get('country', 'Unknown'),
-                "temperature_f": round(current_weather.get('temp', 0)),
-                "feels_like_f": round(current_weather.get('feels_like', 0)),
-                "humidity": current_weather.get('humidity', 0),
-                "description": current_weather.get('weather', [{}])[0].get("description", "No description"),
-                "icon": current_weather.get('weather', [{}])[0].get("icon", "No icon")
-            }
-            
+            weather_info = generate_current(geo_data, current_weather, city_name)
+
             daily_forecasts_raw = weather_data.get("daily", [])
-            daily_forecasts = []
-            for day in daily_forecasts_raw:
-                forecast_date = datetime.utcfromtimestamp(day.get('dt')).strftime('%A, %b %d')
-                daily_forecasts.append({
-                    'date': forecast_date,
-                    'temp_day': round(day.get('temp', {}).get('day', 0)),
-                    'temp_night': round(day.get('temp', {}).get('night', 0)),
-                    'description': day.get('weather', [{}])[0].get('description', 'No description'),
-                    'icon': day.get('weather', [{}])[0].get('icon', '01d')
-                })
-            
+            daily_forecasts = generate_daily(daily_forecasts_raw)
             hourly_forecasts = generate_hourly(weather_data)
             
             return render_template('result.html', results=weather_info, forecast = daily_forecasts, hourly = hourly_forecasts)
