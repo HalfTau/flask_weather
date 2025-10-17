@@ -59,7 +59,7 @@
                     <img src="https://openweathermap.org/img/wn/{{ day.icon }}@2x.png">
                     {%for hour in hourly%}
                         {%if day.date == hour.date%}
-                        <p>{{hour.date}}: {{hour.temp}} <img src="https://openweathermap.org/img/wn/{{ hour.icon }}@2x.png"></p>
+                        <p>{{hour.date}}: {{hour.temp}}°F <img src="https://openweathermap.org/img/wn/{{ hour.icon }}@2x.png"></p>
                         {%endif%}
                     {%endfor%}
                 </div>
