@@ -28,9 +28,9 @@ function toggleDiv(divId, linkId) {
     </form>
 
     <form method="POST" action="/result">
-        {% if not results %}
-            <p>Select a location:</p>
-        {%endif%}
+    {% if not results %}
+        <p>Select a location:</p>
+    {%endif%}
     <div class="card text-center">
     <div class="card-body">
         <h5 class="card-title">{{ results['name'] }}, {{results['state']}}, {{ results['country'] }}</h5>
@@ -46,8 +46,9 @@ function toggleDiv(divId, linkId) {
             <div class="card text-left">
             <div class="card-body">
             {% for day in forecast %}
-            <div class="forecast-day d-flex align-items-start mb-4 gap-3 flex-wrap border-bottom pb-">
-                <h3>{{ day.date }}</h3>
+            <div class="forecast-day d-flex align-items-start mb-4 gap-3 flex-wrap border-bottom pb-
+">
+                <h3 class="card-title">{{ day.date }}</h3>
                 <p>Day: {{ day.temp_day }}°F, Night: {{ day.temp_night }}°F</p>
                 <p>{{ day.description }}</p>
                 <img src="https://openweathermap.org/img/wn/{{ day.icon }}@2x.png">
