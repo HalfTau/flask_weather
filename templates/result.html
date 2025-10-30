@@ -46,28 +46,28 @@ function toggleDiv(divId, linkId) {
             <div class="card text-left">
             <div class="card-body">
             {% for day in forecast %}
-            <div class="forecast-day d-flex align-items-start mb-4 gap-3 flex-wrap border-bottom pb-
-">
-                <h3 class="card-title">{{ day.date }}</h3>
-                <p>Day: {{ day.temp_day }}°F, Night: {{ day.temp_night }}°F</p>
-                <p>{{ day.description }}</p>
-                <img src="https://openweathermap.org/img/wn/{{ day.icon }}@2x.png">
-                <!--building a div for each hour available. Gives each div a unique ID based on 
-                the index of the loop.-->
-                {% if day.hours %}
-                <div class="hour-div" id="hour_div_{{ loop.index }}" style="display: none;">
-                    {% for hour in day.hours %}
-                    <p>{{ hour.time }}: {{ hour.temp }}°F
-                    <img src="https://openweathermap.org/img/wn/{{ hour.icon }}@2x.png"></p>
-                    {% endfor %}
+                <div class="forecast-day d-flex align-items-start mb-4 gap-3 flex-wrap border-bottom pb-
+    ">
+                    <h3 class="card-title">{{ day.date }}</h3>
+                    <p>Day: {{ day.temp_day }}°F, Night: {{ day.temp_night }}°F</p>
+                    <p>{{ day.description }}</p>
+                    <img src="https://openweathermap.org/img/wn/{{ day.icon }}@2x.png">
+                    <!--building a div for each hour available. Gives each div a unique ID based on 
+                    the index of the loop.-->
+                    {% if day.hours %}
+                    <div class="hour-div" id="hour_div_{{ loop.index }}" style="display: none;">
+                        {% for hour in day.hours %}
+                        <p>{{ hour.time }}: {{ hour.temp }}°F
+                        <img src="https://openweathermap.org/img/wn/{{ hour.icon }}@2x.png"></p>
+                        {% endfor %}
+                    </div>
+                    <!--building what gets sent back to toggleDiv. The unique ID of the div as well as the ID for the link. This lets toggleDiv to toggle both the hourly div as well as the link-->
+                    <a href="javascript:toggleDiv('hour_div_{{ loop.index }}', 'toggle_link_{{ loop.index }}');" id="toggle_link_{{ loop.index }}">Show Hourly Forecast</a>
+                    {% endif %}
                 </div>
-                <!--building what gets sent back to toggleDiv. The unique ID of the div as well as the ID for the link. This lets toggleDiv to toggle both the hourly div as well as the link-->
-                <a href="javascript:toggleDiv('hour_div_{{ loop.index }}', 'toggle_link_{{ loop.index }}');" id="toggle_link_{{ loop.index }}">Show Hours</a>
-                {% endif %}
-            </div>
             {% endfor %}
 
-            </div>
+                </div>
             </div>
 
         </div>
