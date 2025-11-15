@@ -1,12 +1,7 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <link rel="stylesheet" href="styles.css">
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flask Weather</title>
-</head>
-<body>
+{% extends "base.html" %}
+
+{% block title %}<title>Flask Weather</title>{%endblock%}
+    {% block content %}
     <p>Aloha</p>
     <p>{{content}}</p>
     <form method="POST" action="/">
@@ -15,10 +10,10 @@
     </form>
 
 
-    {% if geo %}
+    {% if geo_data %}
     <form method="POST" action="/result">
         <p>Select a location:</p>
-        {% for location in geo %}
+        {% for location in geo_data %}
             <label>
                 <input type="radio" name="selected_location" value="{{ loop.index0 }}">
                 {{ location.name }}, {{ location.state or '' }}, {{ location.country }}
@@ -27,5 +22,4 @@
         <button type="submit">Submit Selection</button>
     </form>
     {% endif %}
-</body>
-</html>
+    {% endblock %}

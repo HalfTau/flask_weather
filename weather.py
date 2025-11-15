@@ -1,10 +1,20 @@
-from flask import Flask, render_template, request, session
+from flask import Flask, render_template, request, session, redirect
 import requests
 import os
 from datetime import datetime
 from dotenv import load_dotenv
 from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
 from zoneinfo import ZoneInfo
+import math
+
+def latlon_to_tile(lat: float, lon: float, z: int = 6) -> tuple[int, int, int]:
+    """Web Mercator tile indices for a given lat/lon/zoom."""
+    lat_rad = math.radians(lat)
+    n = 2 ** z
+    x = int((lon + 180.0) / 360.0 * n)
+    y = int((1.0 - math.log(math.tan(lat_rad) + 1 / math.cos(lat_rad)) / math.pi) / 2.0 * n)
+    return z, x, y
+
 
 load_dotenv()
 openweather_api_key =  os.getenv("OPEN_WEATHER_API")
@@ -18,7 +28,7 @@ def build_weather_url(lat,lon):
     return f"https://api.openweathermap.org/data/3.0/onecall?lat={lat}&lon={lon}&appid={openweather_api_key}&units=imperial"
 
 def build_geo_url(city): 
-    return f"http://api.openweathermap.org/geo/1.0/direct?q={city}&limit=5&appid={openweather_api_key}"
+    return f"https://api.openweathermap.org/geo/1.0/direct?q={city}&limit=5&appid={openweather_api_key}"
 
 @app.route('/')
 def hello_world():
@@ -32,7 +42,7 @@ def my_form_post():
     geo_request = requests.get(geo_url)
     geo_data = geo_request.json()
     session['geo_data'] = geo_data
-    return render_template('index.html', geo=geo_data)
+    return render_template('index.html', geo_data=geo_data)
 
 def generate_current(geo_data, current_weather, city_name):
     weather_info = {
@@ -62,6 +72,7 @@ def generate_daily(daily_forecasts_raw):
         }) 
     return daily_forecasts
 
+# for every hour that is returned from the API call, append pertinient information to list
 def generate_hourly(weather_data) :
     hourly_forecasts = []
     for hour in weather_data['hourly']:
@@ -133,10 +144,16 @@ def show_selected():
         current_weather = weather_data.get("current", {})
         weather_info = generate_current(geo_data, current_weather, city_name)
 
+        z, x, y = latlon_to_tile(lat, lon, z=7) # z is zoom, 8 feels good for a city view
+
         return render_template(
             "result.html",
-            results=weather_info,
-            forecast=daily_forecasts
+            today=weather_info,
+            forecast=daily_forecasts,
+            lat=lat,
+            lon=lon,
+            z=z, x=x, y=y,
+            api_key=openweather_api_key
         )
 
     except (IndexError, ValueError):
