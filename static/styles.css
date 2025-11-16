@@ -2,6 +2,12 @@
 .card img { display: block; }
 .border { border-color: rgba(128,128,128,.25) !important; }
 
+.search {
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+}
+
 .hour-div {
     display: inline-block;
     float: none; /* Important to remove default float behavior */

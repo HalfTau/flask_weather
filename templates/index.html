@@ -2,9 +2,14 @@
 
 {% block title %}<title>Flask Weather</title>{%endblock%}
     {% block content %}
-    <p>Aloha</p>
-    <p>{{content}}</p>
-    <form method="POST" action="/">
+
+    {% if not current and not daily and not hourly %}
+    <div class="text-center text-muted mt-4">
+        <p>Search for a city to see the forecast.</p>
+    </div>
+    {% endif %}
+
+    <form class="search" method="POST" action="/">
         <input name="text" placeholder="Enter city name">
         <input type="submit" value="Search">
     </form>
