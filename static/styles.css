@@ -2,6 +2,12 @@
 .card img { display: block; }
 .border { border-color: rgba(128,128,128,.25) !important; }
 
+.main-header {
+    text-align: center;
+}
+.icon-box {
+    text-align: center;
+}
 .search {
     margin-left: auto;
     margin-right: auto;

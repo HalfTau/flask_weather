@@ -5,7 +5,9 @@ from datetime import datetime
 from dotenv import load_dotenv
 from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
 from zoneinfo import ZoneInfo
+from datetime import datetime
 import math
+
 
 def latlon_to_tile(lat: float, lon: float, z: int = 6) -> tuple[int, int, int]:
     """Web Mercator tile indices for a given lat/lon/zoom."""
@@ -30,9 +32,16 @@ def build_weather_url(lat,lon):
 def build_geo_url(city): 
     return f"https://api.openweathermap.org/geo/1.0/direct?q={city}&limit=5&appid={openweather_api_key}"
 
+def day_or_night():
+    current_hour = datetime.now().hour
+    if 6 <= current_hour < 18:  # Assuming 6 AM to 6 PM as day
+        return "d"
+    else:
+        return "n"
+
 @app.route('/')
 def hello_world():
-    content = 'hello'
+    content = day_or_night()
     return render_template('index.html', content=content)
 
 @app.route('/', methods=['POST'])
