@@ -24,8 +24,6 @@ openweather_api_key =  os.getenv("OPEN_WEATHER_API")
 app = Flask(__name__)
 app.secret_key = '2203489023923'
 
-#app_id = '08588f09c1a372a6800949cc83c889a2'
-
 def build_weather_url(lat,lon): 
     return f"https://api.openweathermap.org/data/3.0/onecall?lat={lat}&lon={lon}&appid={openweather_api_key}&units=imperial"
 
