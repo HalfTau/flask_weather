@@ -1,35 +1,30 @@
 {% extends "base.html" %}
 
-
-
 {% block title %}<title>Flask Weather</title>{%endblock%}
     {% block content %}
-    <div class="main-header">Matsutake Weather</div>
-    
-    <div class="icon-box">
-        <img src="https://openweathermap.org/img/wn/01{{ content }}@2x.png">
-    </div>
 
-    <div class="search-section">
-        <form class="search" method="POST" action="/">
-            <input name="text" placeholder="Enter city name">
-            <input type="submit" value="Search">
-        </form>
+    {% if not current and not daily and not hourly %}
+    <div class="text-center text-muted mt-4">
+        <p>Search for a city to see the forecast.</p>
     </div>
+    {% endif %}
 
-    <div class="results">
-        {% if geo_data %}
-        <form method="POST" action="/result">
-            <p>Select a location:</p>
-            {% for location in geo_data %}
-                <label>
-                    <input type="radio" name="selected_location" value="{{ loop.index0 }}">
-                    {{ location.name }}, {{ location.state or '' }}, {{ location.country }}
-                </label><br>
-            {% endfor %}
-            <button type="submit">Submit Selection</button>
-        </form>
-        {% endif %}
-    </div>
+    <form class="search" method="POST" action="/">
+        <input name="text" placeholder="Enter city name">
+        <input type="submit" value="Search">
+    </form>
+
+
+    {% if geo_data %}
+    <form method="POST" action="/result">
+        <p>Select a location:</p>
+        {% for location in geo_data %}
+            <label>
+                <input type="radio" name="selected_location" value="{{ loop.index0 }}">
+                {{ location.name }}, {{ location.state or '' }}, {{ location.country }}
+            </label><br>
+        {% endfor %}
+        <button type="submit">Submit Selection</button>
+    </form>
+    {% endif %}
     {% endblock %}
-

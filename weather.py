@@ -1,10 +1,12 @@
 from flask import Flask, render_template, request, session, redirect
 import requests
 import os
-from dotenv import load_dotenv
-import math
-from openweather import fetch_geo, fetch_onecall, build_daily_forecasts_with_hours
 from datetime import datetime
+from dotenv import load_dotenv
+from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
+from zoneinfo import ZoneInfo
+from datetime import datetime
+import math
 
 
 def latlon_to_tile(lat: float, lon: float, z: int = 6) -> tuple[int, int, int]:
@@ -46,8 +48,9 @@ def hello_world():
 def my_form_post():
     content = day_or_night()
     city_query = request.form['text']
-    geo_data = fetch_geo(city_query, openweather_api_key)
-
+    geo_url = build_geo_url(city_query)
+    geo_request = requests.get(geo_url)
+    geo_data = geo_request.json()
     session['geo_data'] = geo_data
     return render_template('index.html', geo_data=geo_data, content=content)
 
@@ -106,11 +109,46 @@ def show_selected():
         selected_location = geo_data[index]
         lat, lon = selected_location["lat"], selected_location["lon"]
         city_name = selected_location.get("name", "Unknown")
-        
-        weather_data = fetch_onecall(lat, lon, openweather_api_key, units="imperial")
 
-        daily_forecasts = build_daily_forecasts_with_hours(weather_data, "America/Los_Angeles")
+        weather_url = build_weather_url(lat, lon)
+        response = requests.get(weather_url)
+        weather_data = response.json()
 
+        pacific = ZoneInfo("America/Los_Angeles")
+
+        # Localize hourly timestamps
+        for hour in weather_data["hourly"]:
+            hour["local_dt"] = datetime.utcfromtimestamp(hour["dt"]).replace(
+                tzinfo=ZoneInfo("UTC")
+            ).astimezone(pacific)
+            hour["local_date"] = hour["local_dt"].date()
+
+        # Build daily forecasts and attach matching hours
+        daily_forecasts = []
+        for day in weather_data["daily"]:
+            local_dt = datetime.utcfromtimestamp(day["dt"]).replace(
+                tzinfo=ZoneInfo("UTC")
+            ).astimezone(pacific)
+            local_date = local_dt.date()
+
+            hours_for_day = []
+            for h in weather_data["hourly"]:
+                if h["local_date"] == local_date:
+                    hour_info = {
+                        "time": h["local_dt"].strftime("%a %I %p"),
+                        "temp": round(h["temp"]),
+                        "icon": h["weather"][0]["icon"]
+                    }
+                    hours_for_day.append(hour_info)
+
+            daily_forecasts.append({
+                "date": local_dt.strftime("%A, %b %d"),
+                "temp_day": round(day["temp"]["day"]),
+                "temp_night": round(day["temp"]["night"]),
+                "description": day["weather"][0]["description"],
+                "icon": day["weather"][0]["icon"],
+                "hours": hours_for_day
+            })
 
         # Current weather
         current_weather = weather_data.get("current", {})
