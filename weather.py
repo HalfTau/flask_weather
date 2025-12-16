@@ -89,16 +89,17 @@ def generate_daily(daily_forecasts_raw):
     return daily_forecasts
 
 # for every hour that is returned from the API call, append pertinient information to list
-def generate_hourly_forecast(weather_json) :
+def generate_hourly_forecast(weather_json, target_date):
     hourly_forecasts = []
-    for hour in weather_json['hourly']:
-        daily_forecast_date = datetime.utcfromtimestamp(hour.get('dt')).strftime('%a %I %p')
+    for hour in weather_json["hourly"]:
+        # only keep hours that belong to this day
+        if hour.get("local_date") != target_date:
+            continue
 
         hourly_forecasts.append({
-            'dt': hour.get('dt'),
-            'date': daily_forecast_date,
-            'temp': round(hour.get('temp', {})),
-            'icon': hour.get('weather', [{}])[0].get('icon', '01d')
+            "time": hour["local_dt"].strftime("%a %I %p"),
+            "temp": round(hour.get("temp", 0)),
+            "icon": hour.get("weather", [{}])[0].get("icon", "01d")
         })
     return hourly_forecasts
 
@@ -133,13 +134,16 @@ def show_selected():
         # Build daily forecasts and attach matching hours
         daily_forecasts = []
         for day in weather_json["daily"]:
+
+            # Convert from UTC to pacific
             local_dt = datetime.utcfromtimestamp(day["dt"]).replace(
                 tzinfo=ZoneInfo("UTC")
             ).astimezone(pacific)
             local_date = local_dt.date()
 
-            hours_for_day = generate_hourly_forecast(weather_json)
+            hours_for_day = generate_hourly_forecast(weather_json, local_date)
 
+            # Add a day
             daily_forecasts.append({
                 "date": local_dt.strftime("%A, %b %d"),
                 "temp_day": round(day["temp"]["day"]),
