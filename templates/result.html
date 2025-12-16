@@ -35,27 +35,28 @@
         </p>
       </div>
     </div>
-<h2>Rain Map</h2>
 
-<div style="position: relative; width: 256px; height: 256px; border-radius: 12px; overflow: hidden; max-width: 100%;">
-  <!-- Base map (OpenStreetMap) -->
-  <img class="weather_image_1"
-    src="https://tile.openstreetmap.org/{{ z }}/{{ x }}/{{ y }}.png"
-    alt="Base map"
+  <h3>Rain Map</h3>
 
-  >
-  <!-- Weather overlay (choose a layer: temp_new, clouds_new, precipitation_new, wind_new, pressure_new) -->
-  <img class="weather_image_2"
-    src="https://tile.openweathermap.org/map/precipitation_new/{{ z }}/{{ x }}/{{ y }}.png?appid={{ api_key }}"
-    alt="Weather overlay"
-    
-  >
-</div>
+  <div class="map-box">
+    <!-- Base map (OpenStreetMap) -->
+    <img class="weather_image_1"
+      src="https://tile.openstreetmap.org/{{ z }}/{{ x }}/{{ y }}.png"
+      alt="Base map"
 
-<p class="text-secondary" style="font-size:12px; margin-top:6px;">
-  © OpenStreetMap contributors · Weather layer © OpenWeather
-</p>
+    >
+    <!-- Weather overlay (choose a layer: temp_new, clouds_new, precipitation_new, wind_new, pressure_new) -->
+    <img class="weather_image_2"
+      src="https://tile.openweathermap.org/map/precipitation_new/{{ z }}/{{ x }}/{{ y }}.png?appid={{ api_key }}"
+      alt="Weather overlay"
+      
+    >
   </div>
+
+  <p class="text-secondary" style="font-size:12px; margin-top:6px;">
+    © OpenStreetMap contributors · Weather layer © OpenWeather
+  </p>
+</div>
 
   <!-- 🔹 7-day forecast list -->
   <h3 class="h5 mb-3">Next 7 Days</h3>

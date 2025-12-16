@@ -7,6 +7,7 @@ from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
 from zoneinfo import ZoneInfo
 from datetime import datetime
 import math
+from openweather import fetch_geo, fetch_onecall
 
 
 def latlon_to_tile(lat: float, lon: float, z: int = 6) -> tuple[int, int, int]:
@@ -46,12 +47,12 @@ def hello_world():
 
 @app.route('/', methods=['POST'])
 def my_form_post():
+    content = day_or_night()
     city_query = request.form['text']
-    geo_url = build_geo_url(city_query)
-    geo_request = requests.get(geo_url)
-    geo_data = geo_request.json()
+    geo_data = fetch_geo(city_query, openweather_api_key)
+
     session['geo_data'] = geo_data
-    return render_template('index.html', geo_data=geo_data)
+    return render_template('index.html', geo_data=geo_data, content=content)
 
 def generate_current(geo_data, current_weather, city_name):
     weather_info = {
@@ -108,10 +109,8 @@ def show_selected():
         selected_location = geo_data[index]
         lat, lon = selected_location["lat"], selected_location["lon"]
         city_name = selected_location.get("name", "Unknown")
-
-        weather_url = build_weather_url(lat, lon)
-        response = requests.get(weather_url)
-        weather_data = response.json()
+        
+        weather_data = fetch_onecall(lat, lon, openweather_api_key, units="imperial")
 
         pacific = ZoneInfo("America/Los_Angeles")
 

@@ -16,7 +16,18 @@
 
 .hour-div {
     display: inline-block;
-    float: none; /* Important to remove default float behavior */
+    float: none;
+}
+
+/* contains the rain map */
+.map-box {
+    position: relative; 
+    width: 256px; 
+    height: 256px; 
+    border-radius: 12px; 
+    overflow: hidden; 
+    max-width: 100%;
+    padding: 12px;
 }
 
 .weather_image_1 {
@@ -37,7 +48,7 @@
 }
 
 body {
-  background: #f8fafc; /* slightly cleaner light grey */
+  background: #f8fafc;
 }
 
 .hourly-item {
