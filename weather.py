@@ -122,6 +122,7 @@ def show_selected():
         response = requests.get(weather_url)
         weather_json = response.json()
 
+        # this is where the timezone string lives
         pacific = ZoneInfo("America/Los_Angeles")
 
         # Localize hourly timestamps
