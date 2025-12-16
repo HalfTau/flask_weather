@@ -3,14 +3,12 @@
 {% block title %}<title>Flask Weather</title>{%endblock%}
     {% block content %}
 
-    {% if not geo_json %}
         <div class="icon-box">
             <img src="https://openweathermap.org/img/wn/01{{ day_night }}@2x.png">
         </div>
         <div class="text-center text-muted mt-4">
             <p>Search for a city to see the forecast.</p>
         </div>
-    {% endif %}
 
     <form class="search" method="POST" action="/">
         <input name="text" placeholder="Enter city name">
