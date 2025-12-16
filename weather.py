@@ -61,7 +61,7 @@ def my_form_post():
 def generate_current(geo_json, current_weather, city_name):
     selected_index = int(session['index'])
     weather_info = {
-        
+        # test
         "name": city_name,  
         "city": city_name,
         "state": geo_json[selected_index].get('state', 'Unknown'),
