@@ -28,13 +28,14 @@ def build_daily_forecasts_with_hours(weather_data, timezone_str="America/Los_Ang
         hour["local_date"] = hour["local_dt"].date()
 
     # Build daily forecasts and attach matching hours
-    daily_forecasts = []
+    grouped_daily_forecasts= []
     for day in weather_data["daily"]:
         local_dt = datetime.utcfromtimestamp(day["dt"]).replace(
             tzinfo=ZoneInfo("UTC")
         ).astimezone(tz)
         local_date = local_dt.date()
 
+        #loops through each hour to attach to the day
         hours_for_day = []
         for h in weather_data["hourly"]:
             if h["local_date"] == local_date:
@@ -44,7 +45,7 @@ def build_daily_forecasts_with_hours(weather_data, timezone_str="America/Los_Ang
                     "icon": h["weather"][0]["icon"]
                 })
 
-        daily_forecasts.append({
+        grouped_daily_forecasts.append({
             "date": local_dt.strftime("%A, %b %d"),
             "temp_day": round(day["temp"]["day"]),
             "temp_night": round(day["temp"]["night"]),
@@ -53,7 +54,7 @@ def build_daily_forecasts_with_hours(weather_data, timezone_str="America/Los_Ang
             "hours": hours_for_day
         })
 
-    return daily_forecasts
+    return grouped_daily_forecasts
 
 def fetch_onecall(lat, lon, api_key, units="imperial"):
     url = build_weather_url(lat, lon, api_key, units=units)

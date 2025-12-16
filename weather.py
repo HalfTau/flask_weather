@@ -4,7 +4,7 @@ import os
 from dotenv import load_dotenv
 import math
 from openweather import fetch_geo, fetch_onecall, build_daily_forecasts_with_hours
-
+from datetime import datetime
 
 
 def latlon_to_tile(lat: float, lon: float, z: int = 6) -> tuple[int, int, int]:
