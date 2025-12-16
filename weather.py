@@ -1,13 +1,10 @@
 from flask import Flask, render_template, request, session, redirect
 import requests
 import os
-from datetime import datetime
 from dotenv import load_dotenv
-from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
-from zoneinfo import ZoneInfo
-from datetime import datetime
 import math
-from openweather import fetch_geo, fetch_onecall
+from openweather import fetch_geo, fetch_onecall, build_daily_forecasts_with_hours
+
 
 
 def latlon_to_tile(lat: float, lon: float, z: int = 6) -> tuple[int, int, int]:
@@ -112,41 +109,8 @@ def show_selected():
         
         weather_data = fetch_onecall(lat, lon, openweather_api_key, units="imperial")
 
-        pacific = ZoneInfo("America/Los_Angeles")
+        daily_forecasts = build_daily_forecasts_with_hours(weather_data, "America/Los_Angeles")
 
-        # Localize hourly timestamps
-        for hour in weather_data["hourly"]:
-            hour["local_dt"] = datetime.utcfromtimestamp(hour["dt"]).replace(
-                tzinfo=ZoneInfo("UTC")
-            ).astimezone(pacific)
-            hour["local_date"] = hour["local_dt"].date()
-
-        # Build daily forecasts and attach matching hours
-        daily_forecasts = []
-        for day in weather_data["daily"]:
-            local_dt = datetime.utcfromtimestamp(day["dt"]).replace(
-                tzinfo=ZoneInfo("UTC")
-            ).astimezone(pacific)
-            local_date = local_dt.date()
-
-            hours_for_day = []
-            for h in weather_data["hourly"]:
-                if h["local_date"] == local_date:
-                    hour_info = {
-                        "time": h["local_dt"].strftime("%a %I %p"),
-                        "temp": round(h["temp"]),
-                        "icon": h["weather"][0]["icon"]
-                    }
-                    hours_for_day.append(hour_info)
-
-            daily_forecasts.append({
-                "date": local_dt.strftime("%A, %b %d"),
-                "temp_day": round(day["temp"]["day"]),
-                "temp_night": round(day["temp"]["night"]),
-                "description": day["weather"][0]["description"],
-                "icon": day["weather"][0]["icon"],
-                "hours": hours_for_day
-            })
 
         # Current weather
         current_weather = weather_data.get("current", {})
