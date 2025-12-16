@@ -2,6 +2,9 @@
 .card img { display: block; }
 .border { border-color: rgba(128,128,128,.25) !important; }
 
+.icon-box {
+    text-align: center;
+}
 .search {
     margin-left: auto;
     margin-right: auto;

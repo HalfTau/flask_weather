@@ -41,25 +41,31 @@ def day_or_night():
 
 @app.route('/')
 def hello_world():
-    content = day_or_night()
-    return render_template('index.html', content=content)
+    day_night = day_or_night()
+    return render_template('index.html', day_night=day_night)
 
 @app.route('/', methods=['POST'])
 def my_form_post():
-    content = day_or_night()
+    day_night = day_or_night()
+
+    #build API request for geo data, generate a list of potential cities
     city_query = request.form['text']
     geo_url = build_geo_url(city_query)
     geo_request = requests.get(geo_url)
-    geo_data = geo_request.json()
-    session['geo_data'] = geo_data
-    return render_template('index.html', geo_data=geo_data, content=content)
+    geo_json = geo_request.json()
 
-def generate_current(geo_data, current_weather, city_name):
+    #save to session
+    session['geo_json'] = geo_json
+    return render_template('index.html', geo_json=geo_json, day_night=day_night)
+
+def generate_current(geo_json, current_weather, city_name):
+    selected_index = int(session['index'])
     weather_info = {
+        
         "name": city_name,  
         "city": city_name,
-        "state": geo_data[0].get('state', 'Unknown'),
-        "country": geo_data[0].get('country', 'Unknown'),
+        "state": geo_json[selected_index].get('state', 'Unknown'),
+        "country": geo_json[selected_index].get('country', 'Unknown'),
         "temperature_f": round(current_weather.get('temp', 0)),
         "feels_like_f": round(current_weather.get('feels_like', 0)),
         "humidity": current_weather.get('humidity', 0),
@@ -83,9 +89,9 @@ def generate_daily(daily_forecasts_raw):
     return daily_forecasts
 
 # for every hour that is returned from the API call, append pertinient information to list
-def generate_hourly(weather_data) :
+def generate_hourly_forecast(weather_json) :
     hourly_forecasts = []
-    for hour in weather_data['hourly']:
+    for hour in weather_json['hourly']:
         daily_forecast_date = datetime.utcfromtimestamp(hour.get('dt')).strftime('%a %I %p')
 
         hourly_forecasts.append({
@@ -99,25 +105,26 @@ def generate_hourly(weather_data) :
 @app.route('/result', methods=['POST'])
 def show_selected():
     selected_index = request.form.get('selected_location')
-    geo_data = session.get('geo_data', [])
+    session['index'] = selected_index
+    geo_json = session.get('geo_json', [])
 
-    if not (selected_index and geo_data):
+    if not (selected_index and geo_json):
         return "No selection or geo data available"
 
     try:
         index = int(selected_index)
-        selected_location = geo_data[index]
+        selected_location = geo_json[index]
         lat, lon = selected_location["lat"], selected_location["lon"]
         city_name = selected_location.get("name", "Unknown")
 
         weather_url = build_weather_url(lat, lon)
         response = requests.get(weather_url)
-        weather_data = response.json()
+        weather_json = response.json()
 
         pacific = ZoneInfo("America/Los_Angeles")
 
         # Localize hourly timestamps
-        for hour in weather_data["hourly"]:
+        for hour in weather_json["hourly"]:
             hour["local_dt"] = datetime.utcfromtimestamp(hour["dt"]).replace(
                 tzinfo=ZoneInfo("UTC")
             ).astimezone(pacific)
@@ -125,21 +132,13 @@ def show_selected():
 
         # Build daily forecasts and attach matching hours
         daily_forecasts = []
-        for day in weather_data["daily"]:
+        for day in weather_json["daily"]:
             local_dt = datetime.utcfromtimestamp(day["dt"]).replace(
                 tzinfo=ZoneInfo("UTC")
             ).astimezone(pacific)
             local_date = local_dt.date()
 
-            hours_for_day = []
-            for h in weather_data["hourly"]:
-                if h["local_date"] == local_date:
-                    hour_info = {
-                        "time": h["local_dt"].strftime("%a %I %p"),
-                        "temp": round(h["temp"]),
-                        "icon": h["weather"][0]["icon"]
-                    }
-                    hours_for_day.append(hour_info)
+            hours_for_day = generate_hourly_forecast(weather_json)
 
             daily_forecasts.append({
                 "date": local_dt.strftime("%A, %b %d"),
@@ -151,15 +150,15 @@ def show_selected():
             })
 
         # Current weather
-        current_weather = weather_data.get("current", {})
-        weather_info = generate_current(geo_data, current_weather, city_name)
+        current_weather = weather_json.get("current", {})
+        weather_info = generate_current(geo_json, current_weather, city_name)
 
         z, x, y = latlon_to_tile(lat, lon, z=7) # z is zoom, 8 feels good for a city view
 
         return render_template(
             "result.html",
             today=weather_info,
-            forecast=daily_forecasts,
+            next_seven=daily_forecasts,
             lat=lat,
             lon=lon,
             z=z, x=x, y=y,
